@@ -90,8 +90,16 @@ class Toml
     }
 
 
+    /**
+     * Parses TOML value and returns it to be assigned on the hashed array
+     *
+     * @param (string) $val
+     *
+     * @return (mixed) Parsed value.
+     */
     private static function parseValue($val)
     {
+        // TODO: Implement this.
         return $val;
     }
 }
