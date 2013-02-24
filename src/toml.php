@@ -41,6 +41,9 @@ class Toml
         // Cleanup EOL chars.
         $toml = str_replace(array("\r\n", "\n\r"), "\n", $toml);
 
+        // Cleanup TABs
+        $toml = str_replace("\t", " ", $toml);
+
         // Split lines
         $aToml = explode("\n", $toml);
 
@@ -62,6 +65,7 @@ class Toml
             // Keygroup
             if($line[0] == '[' && substr($line, -1) == ']')
             {
+                // Set pointer at first level.
                 $pointer = & $result;
 
                 $keygroup = substr($line, 1, -1);
@@ -74,6 +78,7 @@ class Toml
                         $pointer[$keygroup] = array();
                     }
 
+                    // Move pointer forward
                     $pointer = & $pointer[$keygroup];
                 }
             }
@@ -82,7 +87,8 @@ class Toml
             {
                 $kv = explode('=', $line, 2);
 
-                $pointer[ trim($kv[0]) ] = self::parseValue( trim($kv[1]) );
+                // TODO: Implement multiline array sintax
+                $pointer[ trim($kv[0]) ] = self::parseValue( $kv[1] );
             }
         }
 
@@ -99,7 +105,50 @@ class Toml
      */
     private static function parseValue($val)
     {
-        // TODO: Implement this.
-        return $val;
+        $parsedVal = 'Unknown';
+
+        // Cleanup
+        $val = trim($val);
+
+        // Boolean
+        if($val == 'true' || $val == 'false')
+        {
+            $parsedVal = (bool) $val;
+        }
+        // String
+        elseif($val[0] == '"' && substr($val, -1) == '"')
+        {
+            $parsedVal = str_replace(array('\0', '\t', '\n', '\r', '\"', '\\') , array("\0", "\t", "\n", "\r", '"', "\\"), substr($val, 1, -1));
+        }
+        // Numbers
+        elseif(is_numeric($val))
+        {
+            if(is_int($val))
+            {
+                $parsedVal = (int) $val;
+            }
+            else
+            {
+                $parsedVal = (float) $val;
+            }
+        }
+        // Datetime. parsed to time format.
+        elseif(preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/', $val))
+        {
+            $parsedVal = strtotime($val);
+        }
+        // Single line array
+        elseif($val[0] == '[' && substr($val, -1) == ']')
+        {
+            // TODO: Implement serious array support.
+
+            $parsedVal = json_decode($val);
+        }
+        else
+        {
+            //throw new Exception('Unknown value: ' . $val);
+        }
+
+        return $parsedVal;
     }
 }
