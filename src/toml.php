@@ -44,6 +44,9 @@ class Toml
         // Cleanup TABs
         $toml = str_replace("\t", " ", $toml);
 
+        // Pre-compile
+        $toml = self::normalize($toml);
+
         // Split lines
         $aToml = explode("\n", $toml);
 
@@ -132,8 +135,8 @@ class Toml
                 $parsedVal = (float) $val;
             }
         }
-        // Datetime. parsed to time format.
-        elseif(preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/', $val))
+        // Datetime. Parsed to UNIX time value.
+        elseif(preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $val))
         {
             $parsedVal = strtotime($val);
         }
@@ -146,9 +149,56 @@ class Toml
         }
         else
         {
-            //throw new Exception('Unknown value: ' . $val);
+            throw new Exception('Unknown value type: ' . $val);
         }
 
         return $parsedVal;
+    }
+
+
+    /**
+     * Performs text modifications in order to normalize the TOML file for the parser.
+     * Kind of pre-compiler.
+     *
+     * @param (string) $toml TOML string.
+     *
+     * @return (string) Normalized TOML string
+     */
+    private static function normalize($toml)
+    {
+        $normalized = '';
+        $open = 0;
+
+        for($i = 0; $i < strlen($toml); $i++)
+        {
+            $keep = true;
+
+            if($toml[$i] == '[')
+            {
+                $open++;
+            }
+            elseif($toml[$i] == ']')
+            {
+                if($open > 0)
+                {
+                    $open--;
+                }
+                else
+                {
+                    throw new Exception("Unexpected ']' on line " . ($i + 1));
+                }
+            }
+            elseif($open > 0 && $toml[$i] == "\n")
+            {
+                $keep = false;
+            }
+
+            if($keep)
+            {
+                $normalized .= $toml[$i];
+            }
+        }
+
+        return $normalized;
     }
 }

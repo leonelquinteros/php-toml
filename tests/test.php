@@ -4,5 +4,6 @@ require("../src/toml.php");
 
 $result = Toml::parseFile('example.toml');
 
-echo "\n\nToml::parseFile() test \n";
+echo "\n\nToml::parseFile('example.toml'): \n";
+echo "--------------------------------\n";
 print_r($result);
