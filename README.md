@@ -17,6 +17,7 @@ TODO
 Usage
 -----
 
+```
 <?php
 require("../src/toml.php");
 
@@ -27,3 +28,4 @@ $result = Toml::parse($tomlStr);
 
 // Parse TOML file path
 $result = Toml::parseFile('example.toml');
+```
