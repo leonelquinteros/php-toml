@@ -24,6 +24,7 @@ TODO
 - Throw exception on extra chars after keygroup definition
 - Throw exception on mixed data type arrays
 - Throw exception on key or keygroup overwriting
+- Write better tests.
 
 
 

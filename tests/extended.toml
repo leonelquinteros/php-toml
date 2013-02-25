@@ -1,6 +1,7 @@
 # This is a TOML document. Boom.
 
 title = "TOML Example"
+crazy-string = "With a comment # inside, escaped quotes \" and [brackets]"
 
 [owner]
 name = "Tom Preston-Werner"
@@ -28,8 +29,20 @@ enabled = true
 [clients]
 data = [ ["gamma", "delta"], [1, 2] ] # just an update to make sure parsers support it
 
+# Multi-line array check
+key = [
+  1, 2, 3,
+  [
+    1979-05-27T07:32:00Z,
+    1979-05-27T07:32:00Z,
+  ],
+  [
+    "10.0.0.1", "Escaped \" quote"
+  ]
+]
+
 # Line breaks are OK when inside arrays
 hosts = [
-  "alpha",
+  "alpha # Try this hash",   # Comment here, after string hash.
   "omega"
 ]
