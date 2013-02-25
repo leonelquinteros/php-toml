@@ -1,13 +1,7 @@
 <?php
-/**
- * PHP parser for TOML language: https://github.com/mojombo/toml
- *
- * @author Leonel Quinteros https://github.com/leonelquinteros
- *
- * @version 1.0
- *
- *
- * @copyright 2013 Leonel Quinteros
+/*
+ * @Copyright (c) 2013 Leonel Quinteros
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,6 +28,15 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+/**
+ * PHP parser for TOML language: https://github.com/mojombo/toml
+ *
+ * @author Leonel Quinteros https://github.com/leonelquinteros
+ *
+ * @version 1.0
  *
  */
 class Toml
@@ -67,12 +70,7 @@ class Toml
     public static function parse($toml)
     {
         $result = array();
-
-        // Cleanup EOL chars.
-        $toml = str_replace(array("\r\n", "\n\r"), "\n", $toml);
-
-        // Cleanup TABs
-        $toml = str_replace("\t", " ", $toml);
+        $pointer = & $result;
 
         // Pre-compile
         $toml = self::normalize($toml);
@@ -84,15 +82,10 @@ class Toml
         {
             $line = trim($line);
 
-            // Skip comments
+            // Skip commented and empty lines
             if(empty($line) || $line[0] == '#')
             {
                 continue;
-            }
-            elseif(strpos($line, '#'))
-            {
-                $lineSplit = explode('#', $line, 2);
-                $line = trim($lineSplit[0]);
             }
 
             // Keygroup
@@ -120,12 +113,93 @@ class Toml
             {
                 $kv = explode('=', $line, 2);
 
-                // TODO: Implement multiline array sintax
                 $pointer[ trim($kv[0]) ] = self::parseValue( $kv[1] );
             }
         }
 
         return $result;
+    }
+
+
+    /**
+     * Performs text modifications in order to normalize the TOML file for the parser.
+     * Kind of pre-compiler.
+     *
+     * @param (string) $toml TOML string.
+     *
+     * @return (string) Normalized TOML string
+     */
+    private static function normalize($toml)
+    {
+        // Cleanup EOL chars.
+        $toml = str_replace(array("\r\n", "\n\r"), "\n", $toml);
+
+        // Cleanup TABs
+        $toml = str_replace("\t", " ", $toml);
+
+        $normalized = '';
+        $openBrackets = 0;
+        $openString = false;
+
+        for($i = 0; $i < strlen($toml); $i++)
+        {
+            $keep = true;
+
+            if($toml[$i] == '[' && !$openString)
+            {
+                // Keygroup or array definition start outside a string
+                $openBrackets++;
+            }
+            elseif($toml[$i] == ']' && !$openString)
+            {
+                // Keygroup or array definition end outside a string
+                if($openBrackets > 0)
+                {
+                    $openBrackets--;
+                }
+                else
+                {
+                    throw new Exception("Unexpected ']' on line " . ($i + 1));
+                }
+            }
+            elseif($openBrackets > 0 && $toml[$i] == "\n")
+            {
+                // EOLs inside array or Keygroup definition. We don't want them.
+                $keep = false;
+            }
+            elseif($toml[$i] == '"' && $toml[$i - 1] != "\\")
+            {
+                // String handling, allow escaped quotes.
+                $openString = !$openString;
+            }
+            elseif($toml[$i] == '#' && $openString == 0)
+            {
+                // Remove comments
+                while($toml[$i] != "\n")
+                {
+                    $i++;
+                }
+
+                // Last char we know it's EOL.
+                if($openBrackets)
+                {
+                    $keep = false;
+                }
+            }
+
+            if($keep)
+            {
+                $normalized .= $toml[$i];
+            }
+        }
+
+        // Something went wrong.
+        if($openBrackets || $openString)
+        {
+            throw new Exception('Syntax error found on TOML document.');
+        }
+
+        return $normalized;
     }
 
 
@@ -138,10 +212,15 @@ class Toml
      */
     private static function parseValue($val)
     {
-        $parsedVal = 'Unknown';
+        $parsedVal = null;
 
         // Cleanup
         $val = trim($val);
+
+        if(empty($val))
+        {
+            throw new Exception('Empty value not allowed');
+        }
 
         // Boolean
         if($val == 'true' || $val == 'false')
@@ -170,12 +249,10 @@ class Toml
         {
             $parsedVal = strtotime($val);
         }
-        // Single line array
+        // Single line array (normalized)
         elseif($val[0] == '[' && substr($val, -1) == ']')
         {
-            // TODO: Implement serious array support.
-
-            $parsedVal = json_decode($val);
+            $parsedVal = self::parseArray($val);
         }
         else
         {
@@ -187,48 +264,61 @@ class Toml
 
 
     /**
-     * Performs text modifications in order to normalize the TOML file for the parser.
-     * Kind of pre-compiler.
+     * Recursion function to parse all array values through self::parseValue()
      *
-     * @param (string) $toml TOML string.
+     * @param (array) $array
      *
-     * @return (string) Normalized TOML string
+     * @return (array) Parsed array.
      */
-    private static function normalize($toml)
+    private static function parseArray($val)
     {
-        $normalized = '';
-        $open = 0;
+        $result = array();
+        $openBrackets = 0;
+        $openString = false;
+        $buffer = '';
 
-        for($i = 0; $i < strlen($toml); $i++)
+        for($i = 0; $i < strlen($val); $i++)
         {
-            $keep = true;
+            if($val[$i] == '[' && !$openString)
+            {
+                $openBrackets++;
 
-            if($toml[$i] == '[')
-            {
-                $open++;
-            }
-            elseif($toml[$i] == ']')
-            {
-                if($open > 0)
+                if($openBrackets == 1)
                 {
-                    $open--;
-                }
-                else
-                {
-                    throw new Exception("Unexpected ']' on line " . ($i + 1));
+                    // Skip first and las brackets.
+                    continue;
                 }
             }
-            elseif($open > 0 && $toml[$i] == "\n")
+            elseif($val[$i] == ']' && !$openString)
             {
-                $keep = false;
+                $openBrackets--;
+
+                if($openBrackets == 0)
+                {
+                    $result[] = self::parseValue( trim($buffer) );
+
+                    // Skip first and las brackets. We're finish.
+                    return $result;
+                }
+            }
+            elseif($val[$i] == '"' && $val[$i - 1] != "\\")
+            {
+                $openString = !$openString;
             }
 
-            if($keep)
+            if( $val[$i] == ',' && !$openString && $openBrackets == 1)
             {
-                $normalized .= $toml[$i];
+                $result[] = self::parseValue( trim($buffer) );
+                $buffer = '';
+            }
+            else
+            {
+                $buffer .= $val[$i];
             }
         }
 
-        return $normalized;
+        // If we're here, something went wrong.
+        throw new Exception('Wrong array definition: ' . $val);
     }
+
 }
