@@ -177,6 +177,11 @@ class Toml
                 // String handling, allow escaped quotes.
                 $openString = !$openString;
             }
+            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('0', 't', 'n', 'r', '"', "\\")))
+            {
+                // Reserved special characters should produce error
+                throw new Exception('Reserved special characters inside strings are not allowed: ' . $toml[$i] . $toml[$i+1]);
+            }
             elseif($toml[$i] == '#' && $openString == 0)
             {
                 // Remove comments

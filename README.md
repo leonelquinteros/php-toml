@@ -19,8 +19,6 @@ TODO
 ----
 
 - Support terminating commas before the closing bracket in arrays
-- Throw exception on invalid special characters on string definition.
-- Throw exception on multi-line strings.
 - Throw exception on extra chars after keygroup definition
 - Throw exception on mixed data type arrays
 - Throw exception on key or keygroup overwriting
