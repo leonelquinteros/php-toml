@@ -141,7 +141,8 @@ class Toml
         $openBrackets = 0;
         $openString = false;
 
-        for($i = 0; $i < strlen($toml); $i++)
+        $strLen = strlen($toml);
+        for($i = 0; $i < $strLen; $i++)
         {
             $keep = true;
 
@@ -287,7 +288,8 @@ class Toml
         $openString = false;
         $buffer = '';
 
-        for($i = 0; $i < strlen($val); $i++)
+        $strLen = strlen($val);
+        for($i = 0; $i < $strLen; $i++)
         {
             if($val[$i] == '[' && !$openString)
             {
