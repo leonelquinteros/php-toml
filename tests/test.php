@@ -8,7 +8,7 @@ echo "\n\nToml::parseFile('example.toml'): \n\n";
 print_r($result);
 
 
-$result = Toml::parseFile('example.toml');
+$result = Toml::parseFile('extended.toml');
 
 echo "\n\nToml::parseFile('extended.toml'): \n\n";
 print_r($result);

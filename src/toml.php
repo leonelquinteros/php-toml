@@ -167,6 +167,11 @@ class Toml
                 // EOLs inside array or Keygroup definition. We don't want them.
                 $keep = false;
             }
+            elseif($openString && $toml[$i] == "\n")
+            {
+                // EOLs inside string should throw error.
+                throw new Exception("Multi-line strings are not allowed.");
+            }
             elseif($toml[$i] == '"' && $toml[$i - 1] != "\\")
             {
                 // String handling, allow escaped quotes.
