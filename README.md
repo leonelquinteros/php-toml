@@ -18,7 +18,6 @@ Supports commit: f68d014bfd4a84a64fb5f6a7c1a83a4162415d4b
 TODO
 ----
 
-- Support terminating commas before the closing bracket in arrays
 - Throw exception on extra chars after keygroup definition
 - Throw exception on mixed data type arrays
 - Throw exception on key or keygroup overwriting

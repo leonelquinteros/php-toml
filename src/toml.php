@@ -307,7 +307,11 @@ class Toml
 
                 if($openBrackets == 0)
                 {
-                    $result[] = self::parseValue( trim($buffer) );
+                    // Allow terminating commas before the closing bracket
+                    if(trim($buffer) != '')
+                    {
+                        $result[] = self::parseValue( trim($buffer) );
+                    }
 
                     // Skip first and las brackets. We're finish.
                     return $result;
