@@ -313,7 +313,8 @@ class Toml
                         $result[] = self::parseValue( trim($buffer) );
                     }
 
-                    if (!self::checkDataType($result)) {
+                    if (!self::checkDataType($result))
+                    {
                         throw new Exception('Data types cannot be mixed in an array: ' . $buffer);
                     }
                     // Skip first and las brackets. We're finish.
@@ -328,7 +329,9 @@ class Toml
             if( $val[$i] == ',' && !$openString && $openBrackets == 1)
             {
                 $result[] = self::parseValue( trim($buffer) );
-                if (!self::checkDataType($result)) {
+
+                if (!self::checkDataType($result))
+                {
                     throw new Exception('Data types cannot be mixed in an array: ' . $buffer);
                 }
                 $buffer = '';
@@ -344,44 +347,53 @@ class Toml
     }
 
     /**
-     * Function that checks the data type of the first and last elements of an array, 
+     * Function that checks the data type of the first and last elements of an array,
      * and returns false if they don't match
-     * 
-     * @param  (array) $array 
-     * 
+     *
+     * @param  (array) $array
+     *
      * @return boolean
      */
-    private static function checkDataType($array) {
+    private static function checkDataType($array)
+    {
 
-        if(count($array) <= 1) 
+        if(count($array) <= 1)
+        {
             return true;
+        }
 
         $last = count($array) - 1;
 
         $type = self::getCustomDataType($array[$last]);
 
-        if ($type != self::getCustomDataType($array[0])) {
+        if ($type != self::getCustomDataType($array[0]))
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return true;
-        }     
+        }
 
     }
 
     /**
      * Returns the data type of a variable
-     * 
+     *
      * @param  (mixed) $val
      * @return (string) Data type of value
      */
-    private static function getCustomDataType($val) {
-        
+    private static function getCustomDataType($val)
+    {
         $val = (!is_array($val)) ? trim($val) : $val;
 
-        if (!is_array($val) && self::isISODate($val)) {
-                $type = "date";
-        } else {
-                $type = gettype($val);
+        if (!is_array($val) && self::isISODate($val))
+        {
+            $type = "date";
+        }
+        else
+        {
+            $type = gettype($val);
         }
 
         return $type;
@@ -389,10 +401,12 @@ class Toml
 
     /**
      * Return whether the given value is a valid ISODate
+     *
      * @param  (string)  $val
      * @return boolean
      */
-    private static function isISODate($val) {
+    private static function isISODate($val)
+    {
         return preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $val);
     }
 
