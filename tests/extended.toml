@@ -31,7 +31,9 @@ data = [ ["gamma", "delta"], [1, 2] ] # just an update to make sure parsers supp
 
 # Multi-line array check
 key = [
+  [
   1, 2, 3,
+  ],
   [
     1979-05-27T07:32:00Z,
     1979-05-27T07:32:00Z
