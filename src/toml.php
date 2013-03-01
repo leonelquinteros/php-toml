@@ -256,7 +256,7 @@ class Toml
             }
         }
         // Datetime. Parsed to UNIX time value.
-        elseif(preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $val))
+        elseif(self::isISODate($val))
         {
             $parsedVal = strtotime($val);
         }
@@ -313,6 +313,9 @@ class Toml
                         $result[] = self::parseValue( trim($buffer) );
                     }
 
+                    if (!self::checkDataType($result)) {
+                        throw new Exception('Data types cannot be mixed in an array: ' . $buffer);
+                    }
                     // Skip first and las brackets. We're finish.
                     return $result;
                 }
@@ -325,6 +328,9 @@ class Toml
             if( $val[$i] == ',' && !$openString && $openBrackets == 1)
             {
                 $result[] = self::parseValue( trim($buffer) );
+                if (!self::checkDataType($result)) {
+                    throw new Exception('Data types cannot be mixed in an array: ' . $buffer);
+                }
                 $buffer = '';
             }
             else
@@ -335,6 +341,59 @@ class Toml
 
         // If we're here, something went wrong.
         throw new Exception('Wrong array definition: ' . $val);
+    }
+
+    /**
+     * Function that checks the data type of the first and last elements of an array, 
+     * and returns false if they don't match
+     * 
+     * @param  (array) $array 
+     * 
+     * @return boolean
+     */
+    private static function checkDataType($array) {
+
+        if(count($array) <= 1) 
+            return true;
+
+        $last = count($array) - 1;
+
+        $type = self::getCustomDataType($array[$last]);
+
+        if ($type != self::getCustomDataType($array[0])) {
+            return false;
+        } else {
+            return true;
+        }     
+
+    }
+
+    /**
+     * Returns the data type of a variable
+     * 
+     * @param  (mixed) $val
+     * @return (string) Data type of value
+     */
+    private static function getCustomDataType($val) {
+        
+        $val = (!is_array($val)) ? trim($val) : $val;
+
+        if (!is_array($val) && self::isISODate($val)) {
+                $type = "date";
+        } else {
+                $type = gettype($val);
+        }
+
+        return $type;
+    }
+
+    /**
+     * Return whether the given value is a valid ISODate
+     * @param  (string)  $val
+     * @return boolean
+     */
+    private static function isISODate($val) {
+        return preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $val);
     }
 
 }
