@@ -96,12 +96,18 @@ class Toml
 
                 $keygroup = substr($line, 1, -1);
                 $aKeygroup = explode('.', $keygroup);
+                $last = count($aKeygroup) - 1;
 
-                foreach($aKeygroup as $keygroup)
+                foreach($aKeygroup as $i => $keygroup)
                 {
                     if( !isset($pointer[$keygroup]) )
                     {
                         $pointer[$keygroup] = array();
+                    }
+                    elseif($i == $last)
+                    {
+                        // Overwrite key
+                        throw new Exception('Key overwrite previous keys: ' . $line);
                     }
 
                     // Move pointer forward
@@ -112,8 +118,14 @@ class Toml
             elseif(strpos($line, '='))
             {
                 $kv = explode('=', $line, 2);
-
-                $pointer[ trim($kv[0]) ] = self::parseValue( $kv[1] );
+                if(!isset($pointer[ trim($kv[0]) ]))
+                {
+                    $pointer[ trim($kv[0]) ] = self::parseValue( $kv[1] );
+                }
+                else
+                {
+                    throw new Exception('Key overwrite previous keys: ' . $line);
+                }
             }
             elseif($line[0] == '[' && substr($line, -1) != ']')
             {

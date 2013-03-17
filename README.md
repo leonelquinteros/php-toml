@@ -17,8 +17,6 @@ Supports commit: f68d014bfd4a84a64fb5f6a7c1a83a4162415d4b
 TODO
 ----
 
-- Throw exception on extra chars after keygroup definition
-- Throw exception on key or keygroup overwriting
 - Write better tests.
 - Support Unicode and \b chars.
 
