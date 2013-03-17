@@ -115,6 +115,14 @@ class Toml
 
                 $pointer[ trim($kv[0]) ] = self::parseValue( $kv[1] );
             }
+            elseif($line[0] == '[' && substr($line, -1) != ']')
+            {
+                throw new Exception('Key groups have to be on a line by themselves: ' . $line);
+            }
+            else
+            {
+                throw new Exception('Syntax error on: ' . $line);
+            }
         }
 
         return $result;
