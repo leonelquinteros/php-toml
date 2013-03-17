@@ -6,7 +6,6 @@ PHP parser for TOML language ( https://github.com/mojombo/toml )
 
 Status
 ------
-Supports complete TOML language.
 
 Datetime values are converted to UNIX time using strtotime(). Deciding what to do with them.
 
@@ -21,6 +20,7 @@ TODO
 - Throw exception on extra chars after keygroup definition
 - Throw exception on key or keygroup overwriting
 - Write better tests.
+- Support Unicode and \b chars.
 
 
 

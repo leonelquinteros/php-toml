@@ -137,9 +137,12 @@ class Toml
         // Cleanup TABs
         $toml = str_replace("\t", " ", $toml);
 
-        $normalized = '';
-        $openBrackets = 0;
-        $openString = false;
+        // Run, char by char.
+        $normalized     = '';
+        $openString     = false;
+        $openBrackets   = 0;
+        $openKeygroup   = false;
+        $lineBuffer     = '';
 
         $strLen = strlen($toml);
         for($i = 0; $i < $strLen; $i++)
@@ -150,6 +153,12 @@ class Toml
             {
                 // Keygroup or array definition start outside a string
                 $openBrackets++;
+
+                // Keygroup
+                if($openBrackets == 1 && trim($lineBuffer) == '')
+                {
+                    $openKeygroup = true;
+                }
             }
             elseif($toml[$i] == ']' && !$openString)
             {
@@ -157,21 +166,32 @@ class Toml
                 if($openBrackets > 0)
                 {
                     $openBrackets--;
+
+                    if($openKeygroup)
+                    {
+                        $openKeygroup = false;
+                    }
                 }
                 else
                 {
-                    throw new Exception("Unexpected ']' on line " . ($i + 1));
+                    throw new Exception("Unexpected ']' on: " . $lineBuffer);
                 }
             }
             elseif($openBrackets > 0 && $toml[$i] == "\n")
             {
-                // EOLs inside array or Keygroup definition. We don't want them.
+                // Multi-line keygroup definition is not alowed.
+                if($openKeygroup)
+                {
+                    throw new Exception('Multi-line keygroup definition is not allowed on: ' . $lineBuffer);
+                }
+
+                // EOLs inside array definition. We don't want them.
                 $keep = false;
             }
             elseif($openString && $toml[$i] == "\n")
             {
                 // EOLs inside string should throw error.
-                throw new Exception("Multi-line strings are not allowed.");
+                throw new Exception("Multi-line strings are not allowed on: " . $lineBuffer);
             }
             elseif($toml[$i] == '"' && $toml[$i - 1] != "\\")
             {
@@ -183,19 +203,23 @@ class Toml
                 // Reserved special characters should produce error
                 throw new Exception('Reserved special characters inside strings are not allowed: ' . $toml[$i] . $toml[$i+1]);
             }
-            elseif($toml[$i] == '#' && $openString == 0)
+            elseif($toml[$i] == '#' && !$openString && !$openKeygroup)
             {
-                // Remove comments
-                while($toml[$i] != "\n")
+                // Remove comments only at the end of the line. Doesn't catch comments inside array definition.
+                while(isset($toml[$i]) && $toml[$i] != "\n")
                 {
                     $i++;
                 }
 
                 // Last char we know it's EOL.
-                if($openBrackets)
-                {
-                    $keep = false;
-                }
+                $keep = ($openBrackets == 0);
+            }
+
+            // Raw Lines
+            $lineBuffer .= $toml[$i];
+            if($toml[$i] == "\n")
+            {
+                $lineBuffer = '';
             }
 
             if($keep)
@@ -205,7 +229,7 @@ class Toml
         }
 
         // Something went wrong.
-        if($openBrackets || $openString)
+        if($openBrackets || $openString || $openKeygroup)
         {
             throw new Exception('Syntax error found on TOML document.');
         }
@@ -297,7 +321,7 @@ class Toml
 
                 if($openBrackets == 1)
                 {
-                    // Skip first and las brackets.
+                    // Skip first and last brackets.
                     continue;
                 }
             }

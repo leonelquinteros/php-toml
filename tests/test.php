@@ -12,3 +12,8 @@ $result = Toml::parseFile('extended.toml');
 
 echo "\n\nToml::parseFile('extended.toml'): \n\n";
 print_r($result);
+
+$result = Toml::parseFile('hard_example.toml');
+
+echo "\n\nToml::parseFile('hard_example.toml'): \n\n";
+print_r($result);
