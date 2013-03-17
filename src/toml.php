@@ -285,7 +285,9 @@ class Toml
         // String
         elseif($val[0] == '"' && substr($val, -1) == '"')
         {
-            $parsedVal = str_replace(array('\0', '\t', '\n', '\r', '\"', '\\') , array("\0", "\t", "\n", "\r", '"', "\\"), substr($val, 1, -1));
+            // $parsedVal = str_replace(array('\0', '\t', '\n', '\r', '\"', '\\') , array("\0", "\t", "\n", "\r", '"', "\\"), substr($val, 1, -1));
+            // TOML's specification says it's the same as for JSON format... so
+            $parsedVal = json_decode($val);
         }
         // Numbers
         elseif(is_numeric($val))

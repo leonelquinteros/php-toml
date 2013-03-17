@@ -18,7 +18,6 @@ TODO
 ----
 
 - Write better tests.
-- Support Unicode and \b chars.
 
 
 
