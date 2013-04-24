@@ -5,7 +5,7 @@ PHP parser for TOML language ( https://github.com/mojombo/toml )
 
 Datetime values are converted to UNIX time using strtotime(). Deciding what to do with them.
 
-Supports commit: 751cec15d8f183b15cab3d92b6a7faa145316a13 ( 2013-03-17 )
+Supports version: v0.1.0
 
 
 Requirements
