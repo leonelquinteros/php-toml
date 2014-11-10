@@ -88,21 +88,49 @@ class Toml
                 continue;
             }
 
-            // Keygroup
-            if($line[0] == '[' && substr($line, -1) == ']')
+            // Array of Tables
+            if(substr($line, 0, 2) == '[[' && substr($line, -2) == ']]')
             {
                 // Set pointer at first level.
                 $pointer = & $result;
 
-                $keygroup = substr($line, 1, -1);
-                $aKeygroup = explode('.', $keygroup);
-                $last = count($aKeygroup) - 1;
+                $tableName = substr($line, 2, -2);
+                $aTable = explode('.', $tableName);
+                $last = count($aTable) - 1;
 
-                foreach($aKeygroup as $i => $keygroup)
+                foreach($aTable as $i => $tableName)
                 {
-                    if( !isset($pointer[$keygroup]) )
+                    if( !isset($pointer[$tableName]) )
                     {
-                        $pointer[$keygroup] = array();
+                        // Create array of tables
+                        $pointer[$tableName] = array(array());
+                    }
+                    else
+                    {
+                        // Add new
+                        $pointer[$tableName][] = array();
+                    }
+
+                    // Move pointer forward
+                    $pointer = & $pointer[$tableName][count($pointer[$tableName]) -1];
+                }
+            }
+            // Single Tables
+            elseif($line[0] == '[' && substr($line, -1) == ']')
+            {
+                // Set pointer at first level.
+                $pointer = & $result;
+
+                $tableName = substr($line, 1, -1);
+                $aTable = explode('.', $tableName);
+                $last = count($aTable) - 1;
+
+                foreach($aTable as $i => $tableName)
+                {
+                    if( !isset($pointer[$tableName]) )
+                    {
+                        // Create table
+                        $pointer[$tableName] = array();
                     }
                     elseif($i == $last)
                     {
@@ -111,7 +139,7 @@ class Toml
                     }
 
                     // Move pointer forward
-                    $pointer = & $pointer[$keygroup];
+                    $pointer = & $pointer[$tableName];
                 }
             }
             // Key = Values
