@@ -332,7 +332,7 @@ class Toml
         // Datetime. Parsed to UNIX time value.
         elseif(self::isISODate($val))
         {
-            $parsedVal = strtotime($val);
+            $parsedVal = new DateTime($val);
         }
         // Single line array (normalized)
         elseif($val[0] == '[' && substr($val, -1) == ']')
@@ -459,9 +459,9 @@ class Toml
      */
     private static function getCustomDataType($val)
     {
-        $val = (!is_array($val)) ? trim($val) : $val;
+        //$val = (!is_array($val)) ? trim($val) : $val;
 
-        if (!is_array($val) && self::isISODate($val))
+        if (!is_array($val))
         {
             $type = "date";
         }

@@ -7,9 +7,7 @@ PHP parser for TOML language ( https://github.com/toml-lang/toml )
 Support
 -------
 
-Supports version: 0.2.0
-
-- Datetime values are converted to UNIX time using strtotime().
+TOML version: 0.2.0
 
 
 Requirements
