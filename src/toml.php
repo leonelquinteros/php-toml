@@ -313,7 +313,6 @@ class Toml
         // String
         elseif($val[0] == '"' && substr($val, -1) == '"')
         {
-            // $parsedVal = str_replace(array('\0', '\t', '\n', '\r', '\"', '\\') , array("\0", "\t", "\n", "\r", '"', "\\"), substr($val, 1, -1));
             // TOML's specification says it's the same as for JSON format... so
             $parsedVal = json_decode($val);
         }
@@ -430,7 +429,6 @@ class Toml
      */
     private static function checkDataType($array)
     {
-
         if(count($array) <= 1)
         {
             return true;
@@ -448,7 +446,6 @@ class Toml
         {
             return true;
         }
-
     }
 
     /**
@@ -459,8 +456,6 @@ class Toml
      */
     private static function getCustomDataType($val)
     {
-        //$val = (!is_array($val)) ? trim($val) : $val;
-
         if (!is_array($val))
         {
             $type = "date";
@@ -481,7 +476,16 @@ class Toml
      */
     private static function isISODate($val)
     {
-        return preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $val);
-    }
+        // Use DateTime support to check for valid dates.
+        try
+        {
+            $date = new DateTime($val);
+        }
+        catch(Exception $e)
+        {
+            return false;
+        }
 
+        return true;
+    }
 }

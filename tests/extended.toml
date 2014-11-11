@@ -7,7 +7,7 @@ crazy-string = "With a comment # inside, escaped quotes \" and [brackets]"
 name = "Tom Preston-Werner"
 organization = "GitHub"
 bio = "GitHub Cofounder & CEO\nLikes tater tots and beer."
-dob = 1979-05-27T07:32:00Z # First class dates? Why not?
+dob = 1979-05-27T00:32:00.999999-07:00 # First class dates? Why not?
 
 [database]
 server = "192.168.1.1"
@@ -48,3 +48,11 @@ hosts = [
   "alpha # Try this hash",   # Comment here, after string hash.
   "omega",
 ]
+
+[version030.floats]
+
+fractional = [ +1.0, 3.1415, -0.01 ]
+
+exponent = [ 5e+22, 1e6, -2E-2 ]
+
+both = 6.626e-34
