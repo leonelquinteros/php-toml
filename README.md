@@ -19,7 +19,37 @@ Requirements
 Installation
 ------------
 
-Grab src/toml.php and put it where you need it.
+Grab src/Toml.php and use it where you need it.
+
+This library intends to stay simple and support older versions of PHP down to 5.2.
+Common autoloaders would work for standard use as long as the file Toml.php is in the include path.
+
+
+If you need to use it into namespaced environments or with a certain autoloader struct,
+you can wrap it up to your own taste creating a simple file like:
+
+
+##### /some/project/namespace/path/My/Own/Toml.php
+
+```
+<?php
+namespace My\Own
+
+require("/path/to/github/cloned/repo/php-toml/src/Toml.php");
+
+```
+
+
+##### /some/project/autoloader/class/My/Own/Toml.php
+
+```
+<?php
+
+require("/path/to/github/cloned/repo/php-toml/src/Toml.php");
+
+class My_Own_Toml extends Toml {}
+
+```
 
 
 Usage
@@ -27,7 +57,7 @@ Usage
 
 ```
 <?php
-require("../src/toml.php");
+require("../src/Toml.php");
 
 // Parse TOML string
 $tomlStr = file_get_contents('example.toml');
