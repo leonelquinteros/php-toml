@@ -56,6 +56,7 @@ class Toml
         }
 
         $toml = file_get_contents($path);
+
         return self::parse($toml);
     }
 
@@ -123,6 +124,14 @@ class Toml
                 $pointer = & $result;
 
                 $tableName = substr($line, 1, -1);
+                $tableName = trim($tableName);
+
+                // Allow quoted table names
+                if($tableName[0] == '"' && substr($tableName,-1) == '"')
+                {
+                    $tableName = json_decode($tableName);
+                }
+
                 $aTable = explode('.', $tableName);
                 $last = count($aTable) - 1;
 
@@ -276,7 +285,7 @@ class Toml
             elseif($toml[$i] == '"' && $toml[$i - 1] != "\\") // String handling, allow escaped quotes.
             {
                 // Check multi-line strings
-                if($toml[$i+1] == '"' && $toml[$i+2] == '"')
+                if(substr($toml, $i, 3) == '"""')
                 {
                     // Include the token inmediately.
                     $i += 2;
@@ -286,7 +295,7 @@ class Toml
 
                     $openMString = !$openMString;
                 }
-                else // Simple strings
+                elseif(!$openMString) // Simple strings
                 {
                     $openString = !$openString;
                 }
@@ -294,7 +303,7 @@ class Toml
             elseif($toml[$i] == "'") // Literal string handling.
             {
                 // Check multi-line strings
-                if($toml[$i+1] == "'" && $toml[$i+2] == "'")
+                if(substr($toml, $i, 3) == "'''")
                 {
                     // Include the token inmediately.
                     $i += 2;
@@ -304,12 +313,12 @@ class Toml
 
                     $openMLString = !$openMLString;
                 }
-                else // Simple strings
+                elseif(!$openMLString) // Simple strings
                 {
                     $openLString = !$openLString;
                 }
             }
-            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('0', 't', 'n', 'r', "u", "U", '"', "\\")))
+            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('b', 't', 'n', 'f', 'r', 'u', 'U', '"', "\\", ' ')))
             {
                 // Reserved special characters inside strings should produce error
                 if($openString)
@@ -323,8 +332,8 @@ class Toml
                     while($toml[$i+1] == "\n" || $toml[$i+1] == " ")
                     {
                         $i++;
+                        $keep = false;
                     }
-                    $keep = false;
                 }
             }
             elseif($toml[$i] == '#' && !$openString && !$openKeygroup)
