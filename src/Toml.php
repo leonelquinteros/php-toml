@@ -102,6 +102,20 @@ class Toml
 
                 foreach($aTable as $i => $tableName)
                 {
+                    if($tableName == "")
+                    {
+                        // Empty table name
+                        throw new Exception("Empty table keys aren't allowed on line " . $line);
+                    }
+
+                    $tableName = trim($tableName);
+
+                    // Allow quoted table names
+                    if($tableName[0] == '"' && substr($tableName,-1) == '"')
+                    {
+                        $tableName = json_decode($tableName);
+                    }
+
                     if( !isset($pointer[$tableName]) )
                     {
                         // Create array of tables
@@ -137,6 +151,12 @@ class Toml
 
                 foreach($aTable as $i => $tableName)
                 {
+                    if($tableName == "")
+                    {
+                        // Empty table name
+                        throw new Exception("Empty table keys aren't allowed on line " . $line);
+                    }
+
                     if( !isset($pointer[$tableName]) )
                     {
                         // Create table

@@ -2,7 +2,7 @@
 
 require('../src/Toml.php');
 
-$toml = '["valid key"]';
+$toml = '[naughty..naughty]';
 
 $result = Toml::parse($toml);
 
