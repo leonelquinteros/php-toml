@@ -610,7 +610,7 @@ class Toml
      * @param  (string)  $val
      * @return boolean
      */
-    private static function isISODate($val)
+    public static function isISODate($val)
     {
         // Use DateTime support to check for valid dates.
         try
