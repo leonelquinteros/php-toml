@@ -69,13 +69,26 @@ $result = Toml::parseFile('example.toml');
 ```
 
 
+Test
+----
+
+This project supports the toml-test Test Suite:
+
+(https://github.com/BurntSushi/toml-test)
+
+To run the test suite, after toml-test is installed on your environment, run the following:
+
+```
+toml-test /path/to/github/cloned/repo/php-toml/toml-test/test.php
+```
+
+
 Contribute
 ----------
 
 - Use and test the lib.
 - Report issues/bugs/comments/suggestions on Github
 - Send me your pull requests with improvements/new features
-
 
 
 License
