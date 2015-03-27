@@ -15,7 +15,7 @@ catch(Exception $e)
 function walk(&$a) {
     foreach($a as $i => $v)
     {
-        if(is_array($v))
+        if(is_array($v) && array_values($v) !== $v)
         {
             walk($a[$i]);
         }
@@ -39,16 +39,21 @@ function walk(&$a) {
                 $t = 'integer';
             }
 
+            // Parse array type
+            if($t == 'array')
+            {
+                walk($v);
+            }
+            else
+            {
+                $v = "$v";
+            }
+
             $a[$i] = array(
                 'type' => $t,
-                'value' => "$v",
+                'value' => $v,
             );
         }
-    }
-
-    if(empty($a))
-    {
-        $a = new stdClass();
     }
 }
 
