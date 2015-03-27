@@ -77,7 +77,6 @@ class Toml
 
         // Split lines
         $aToml = explode("\n", $toml);
-        print_r($aToml);
 
         //foreach($aToml as $line)
         for($ln = 0; $ln < count($aToml); $ln++)
@@ -310,7 +309,7 @@ class Toml
                     $openLString = !$openLString;
                 }
             }
-            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('0', 't', 'n', 'r', "u", '"', "\\")))
+            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('0', 't', 'n', 'r', "u", "U", '"', "\\")))
             {
                 // Reserved special characters inside strings should produce error
                 if($openString)
