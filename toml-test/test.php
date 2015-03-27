@@ -41,7 +41,7 @@ function walk(&$a) {
 
             $a[$i] = array(
                 'type' => $t,
-                'value' => $v,
+                'value' => "$v",
             );
         }
     }
