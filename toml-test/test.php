@@ -45,6 +45,11 @@ function walk(&$a) {
             );
         }
     }
+
+    if(empty($a))
+    {
+        $a = new stdClass();
+    }
 }
 
 walk($result);
