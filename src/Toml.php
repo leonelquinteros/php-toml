@@ -77,10 +77,12 @@ class Toml
 
         // Split lines
         $aToml = explode("\n", $toml);
+        print_r($aToml);
 
-        foreach($aToml as $line)
+        //foreach($aToml as $line)
+        for($ln = 0; $ln < count($aToml); $ln++)
         {
-            $line = trim($line);
+            $line = trim($aToml[$ln]);
 
             // Skip commented and empty lines
             if(empty($line) || $line[0] == '#')
@@ -148,7 +150,35 @@ class Toml
                 $kv = explode('=', $line, 2);
                 if(!isset($pointer[ trim($kv[0]) ]))
                 {
-                    $pointer[ trim($kv[0]) ] = self::parseValue( $kv[1] );
+                    // Multi-line strings
+                    if(substr(trim($kv[1]), 0, 3) == '"""')
+                    {
+                        if(strlen(trim($kv[1])) > 3 && substr(trim($kv[1]), -3) != '"""' || strlen(trim($kv[1])) == 3)
+                        {
+                            do
+                            {
+                                $ln++;
+                                $kv[1] .= "\n" . $aToml[$ln];
+                            }
+                            while(strpos($aToml[$ln], '"""') === false);
+                        }
+                    }
+
+                    // Multi-line literal strings
+                    if(substr(trim($kv[1]), 0, 3) == "'''")
+                    {
+                        if(strlen(trim($kv[1])) > 3 && substr(trim($kv[1]), -3) != "'''" || strlen(trim($kv[1])) == 3)
+                        {
+                            do
+                            {
+                                $ln++;
+                                $kv[1] .= "\n" . $aToml[$ln];
+                            }
+                            while(strpos($aToml[$ln], "'''") === false);
+                        }
+                    }
+
+                    $pointer[ trim($kv[0]) ] = self::parseValue( trim($kv[1]) );
                 }
                 else
                 {
@@ -188,6 +218,9 @@ class Toml
         // Run, char by char.
         $normalized     = '';
         $openString     = false;
+        $openLString    = false;
+        $openMString    = false;
+        $openMLString   = false;
         $openBrackets   = 0;
         $openKeygroup   = false;
         $lineBuffer     = '';
@@ -241,15 +274,59 @@ class Toml
                 // EOLs inside string should throw error.
                 throw new Exception("Multi-line strings are not allowed on: " . $lineBuffer);
             }
-            elseif($toml[$i] == '"' && $toml[$i - 1] != "\\")
+            elseif($toml[$i] == '"' && $toml[$i - 1] != "\\") // String handling, allow escaped quotes.
             {
-                // String handling, allow escaped quotes.
-                $openString = !$openString;
+                // Check multi-line strings
+                if($toml[$i+1] == '"' && $toml[$i+2] == '"')
+                {
+                    // Include the token inmediately.
+                    $i += 2;
+                    $normalized .= '"""';
+                    $lineBuffer .= '"""';;
+                    $keep = false;
+
+                    $openMString = !$openMString;
+                }
+                else // Simple strings
+                {
+                    $openString = !$openString;
+                }
             }
-            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('0', 't', 'n', 'r', '"', "\\")))
+            elseif($toml[$i] == "'") // Literal string handling.
             {
-                // Reserved special characters should produce error
-                throw new Exception('Reserved special characters inside strings are not allowed: ' . $toml[$i] . $toml[$i+1]);
+                // Check multi-line strings
+                if($toml[$i+1] == "'" && $toml[$i+2] == "'")
+                {
+                    // Include the token inmediately.
+                    $i += 2;
+                    $normalized .= "'''";
+                    $lineBuffer .= "'''";
+                    $keep = false;
+
+                    $openMLString = !$openMLString;
+                }
+                else // Simple strings
+                {
+                    $openLString = !$openLString;
+                }
+            }
+            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('0', 't', 'n', 'r', "u", '"', "\\")))
+            {
+                // Reserved special characters inside strings should produce error
+                if($openString)
+                {
+                    throw new Exception('Reserved special characters inside strings are not allowed: ' . $toml[$i] . $toml[$i+1]);
+                }
+
+                // Cleanup escaped new lines and whitespaces from multi-line strings
+                if($openMString)
+                {
+                    while($toml[$i+1] == "\n" || $toml[$i+1] == " ")
+                    {
+                        $i++;
+                    }
+                    $keep = false;
+                }
             }
             elseif($toml[$i] == '#' && !$openString && !$openKeygroup)
             {
@@ -277,7 +354,7 @@ class Toml
         }
 
         // Something went wrong.
-        if($openBrackets || $openString || $openKeygroup)
+        if($openBrackets || $openString || $openLString || $openMString || $openMLString || $openKeygroup)
         {
             throw new Exception('Syntax error found on TOML document.');
         }
@@ -300,7 +377,7 @@ class Toml
         // Cleanup
         $val = trim($val);
 
-        if(empty($val))
+        if($val === '')
         {
             throw new Exception('Empty value not allowed');
         }
@@ -310,6 +387,42 @@ class Toml
         {
             $parsedVal = (bool) $val;
         }
+        // Literal multi-line string
+        elseif(substr($val, 0, 3) == "'''" && substr($val, -3) == "'''")
+        {
+            $parsedVal = substr($val, 3, -3);
+
+            // Trim first newline on multi-line string definition
+            if($parsedVal[0] == "\n")
+            {
+                $parsedVal = substr($parsedVal, 1);
+            }
+        }
+        // Literal string
+        elseif($val[0] == "'" && substr($val, -1) == "'")
+        {
+            // No newlines allowed
+            if(strpos($val, "\n") !== false)
+            {
+                throw new Exception('New lines not allowed on single line string literals.');
+            }
+
+            $parsedVal = substr($val, 1, -1);
+        }
+        // Multi-line string
+        elseif(substr($val, 0, 3) == '"""' && substr($val, -3) == '"""')
+        {
+            $parsedVal = substr($val, 3, -3);
+
+            // Trim first newline on multi-line string definition
+            if($parsedVal[0] == "\n")
+            {
+                $parsedVal = substr($parsedVal, 1);
+            }
+
+            // Use json_decode to finally parse the string.
+            $parsedVal = json_decode('"' . str_replace("\n", '\n', $parsedVal) . '"');
+        }
         // String
         elseif($val[0] == '"' && substr($val, -1) == '"')
         {
@@ -317,8 +430,10 @@ class Toml
             $parsedVal = json_decode($val);
         }
         // Numbers
-        elseif(is_numeric($val))
+        elseif(is_numeric(str_replace('_', '', $val)))
         {
+            $val = str_replace('_', '', $val);
+
             if(is_int($val))
             {
                 $parsedVal = (int) $val;
@@ -337,6 +452,11 @@ class Toml
         elseif($val[0] == '[' && substr($val, -1) == ']')
         {
             $parsedVal = self::parseArray($val);
+        }
+        // Inline table (normalized)
+        elseif($val[0] == '{' && substr($val, -1) == '}')
+        {
+            $parsedVal = self::parseInlineTable($val);
         }
         else
         {
@@ -417,6 +537,14 @@ class Toml
 
         // If we're here, something went wrong.
         throw new Exception('Wrong array definition: ' . $val);
+    }
+
+    /**
+     * Parse inline tables into common table array
+     */
+    private static function parseInlineTable($val)
+    {
+        return $val;
     }
 
     /**

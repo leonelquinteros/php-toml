@@ -7,7 +7,7 @@ PHP parser for TOML language ( https://github.com/toml-lang/toml )
 Support
 -------
 
-TOML version: 0.2.0
+TOML version: [v0.4.0](https://github.com/mojombo/toml/blob/master/versions/en/toml-v0.4.0.md)
 
 
 Requirements
