@@ -105,7 +105,7 @@ class Toml
                     if($tableName == "")
                     {
                         // Empty table name
-                        throw new Exception("Empty table keys aren't allowed on line " . $line);
+                        throw new Exception("Empty table keys aren't allowed");
                     }
 
                     $tableName = trim($tableName);
@@ -114,6 +114,11 @@ class Toml
                     if($tableName[0] == '"' && substr($tableName,-1) == '"')
                     {
                         $tableName = json_decode($tableName);
+                    }
+                    elseif(!ctype_alnum(str_replace(array('-', '_', '.'), '', $tableName))) // Check for proper keys
+                    {
+                        // Invalid table name
+                        throw new Exception("Invalid table name: " . $tableName);
                     }
 
                     if( !isset($pointer[$tableName]) )
@@ -144,6 +149,11 @@ class Toml
                 if($tableName[0] == '"' && substr($tableName,-1) == '"')
                 {
                     $tableName = json_decode($tableName);
+                }
+                elseif(!ctype_alnum(str_replace(array('-', '_', '.'), '', $tableName))) // Check for proper keys
+                {
+                    // Invalid table name
+                    throw new Exception("Invalid table name: " . $tableName);
                 }
 
                 $aTable = explode('.', $tableName);
