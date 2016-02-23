@@ -1,4 +1,4 @@
 <?php
-require("/home/travis/build/leonelquinteros/php-toml/src/toml.php");
+require("../src/Toml.php");
 
 Toml::parseFile('example.toml');
