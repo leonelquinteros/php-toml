@@ -8,3 +8,7 @@ php:
   - '7.0'
   - hhvm
   - nightly
+
+script: 
+  - cd travis-test
+  - php test.php

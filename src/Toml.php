@@ -330,7 +330,7 @@ class Toml
                     $openString = !$openString;
                 }
             }
-            elseif($toml[$i] == "'") // Literal string handling.
+            elseif($toml[$i] == "'" && !$openString) // Literal string handling.
             {
                 // Check multi-line strings
                 if(substr($toml, $i, 3) == "'''")
