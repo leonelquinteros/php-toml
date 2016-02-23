@@ -423,7 +423,7 @@ class Toml
         // Boolean
         if($val == 'true' || $val == 'false')
         {
-            $parsedVal = (bool) $val;
+            $parsedVal = ($val == 'true');
         }
         // Literal multi-line string
         elseif(substr($val, 0, 3) == "'''" && substr($val, -3) == "'''")
