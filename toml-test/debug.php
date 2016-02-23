@@ -2,7 +2,9 @@
 
 require('../src/Toml.php');
 
-$toml = 'thevoid = [[[[[]]]]]';
+$toml = '[a]
+[a.b]
+';
 
 $result = Toml::parse($toml);
 
