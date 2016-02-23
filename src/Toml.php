@@ -36,7 +36,7 @@
  *
  * @author Leonel Quinteros https://github.com/leonelquinteros
  *
- * @version 0.4.0
+ * @version 0.4.1
  *
  */
 class Toml
