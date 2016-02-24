@@ -5,7 +5,7 @@
         "php": ">=5.2.0"
     },
     "type": "library",
-    "keywords": ["toml", "parser", "mojombo", "php", "leonelquinteros"],
+    "keywords": ["toml", "parser", "php", "library", "lib", "class", "package", "mojombo", "leonelquinteros"],
     "homepage": "http://github.com/leonelquinteros/php-toml",
     "license": "BSD"
 }
