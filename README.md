@@ -34,7 +34,7 @@ you can wrap it up to your own taste creating a simple file like:
 
 ##### /some/project/namespace/path/My/Own/Toml.php
 
-```
+```php
 <?php
 namespace My\Own
 
@@ -45,7 +45,7 @@ require("/path/to/github/cloned/repo/php-toml/src/Toml.php");
 
 ##### /some/project/autoloader/class/My/Own/Toml.php
 
-```
+```php
 <?php
 
 require("/path/to/github/cloned/repo/php-toml/src/Toml.php");
@@ -58,7 +58,7 @@ class My_Own_Toml extends Toml {}
 Usage
 -----
 
-```
+```php
 <?php
 require("../src/Toml.php");
 
@@ -81,7 +81,7 @@ This project supports the toml-test Test Suite:
 
 To run the test suite, after toml-test is installed on your environment, run the following:
 
-```
+```bash
 toml-test /path/to/github/cloned/repo/php-toml/toml-test/test.php
 ```
 
