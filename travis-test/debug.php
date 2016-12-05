@@ -2,15 +2,8 @@
 require("../src/Toml.php");
 
 $str = <<<STR
-[[fruit]]
-  name = "apple"
-
-[fruit.physical]
-  color = "red"
-  shape = "round"
-
-[[fruit]]
-  name = "banana"
+[tab1]
+foo = {bar='Donald Duck'}
 
 STR;
 
