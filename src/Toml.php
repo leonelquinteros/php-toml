@@ -72,6 +72,7 @@ class Toml
     {
         $result = array();
         $pointer = & $result;
+        $isTableArray = false;
 
         // Pre-compile
         $toml = self::normalize($toml);
@@ -93,22 +94,24 @@ class Toml
             // Array of Tables
             if(substr($line, 0, 2) == '[[' && substr($line, -2) == ']]')
             {
-                // Set pointer at first level.
+                // Mark table array
+                $isTableArray = true;
+
+                // Set pointer at top level.
                 $pointer = & $result;
 
                 $tableName = substr($line, 2, -2);
                 $aTable = explode('.', $tableName);
-                $last = count($aTable) - 1;
 
-                foreach($aTable as $i => $tableName)
+                foreach($aTable as $tableName)
                 {
+                    $tableName = trim($tableName);
+
                     if($tableName == "")
                     {
                         // Empty table name
                         throw new Exception("Empty table keys aren't allowed");
                     }
-
-                    $tableName = trim($tableName);
 
                     // Allow quoted table names
                     if($tableName[0] == '"' && substr($tableName,-1) == '"')
@@ -124,21 +127,19 @@ class Toml
                     if( !isset($pointer[$tableName]) )
                     {
                         // Create array of tables
-                        $pointer[$tableName] = array(array());
-                    }
-                    else
-                    {
-                        // Add new
-                        $pointer[$tableName][] = array();
+                        $pointer[$tableName] = array();
                     }
 
                     // Move pointer forward
-                    $pointer = & $pointer[$tableName][count($pointer[$tableName]) -1];
+                    $pointer = & $pointer[$tableName];
                 }
             }
             // Single Tables
             elseif($line[0] == '[' && substr($line, -1) == ']')
             {
+                // Unmark table array
+                $isTableArray = false;
+
                 // Set pointer at first level.
                 $pointer = & $result;
 
@@ -186,6 +187,19 @@ class Toml
             elseif(strpos($line, '='))
             {
                 $kv = explode('=', $line, 2);
+
+                // Handle table array
+                if($isTableArray)
+                {
+                    // Create new item and point it
+                    $pointer[] = array();
+                    end($pointer);
+                    $pointer =  & $pointer[key($pointer)];
+
+                    // Unmark table array
+                    $isTableArray = false;
+                }
+
                 if(!isset($pointer[ trim($kv[0]) ]))
                 {
                     // Multi-line strings
@@ -216,6 +230,7 @@ class Toml
                         }
                     }
 
+                    // Set key=value
                     $pointer[ trim($kv[0]) ] = self::parseValue( trim($kv[1]) );
                 }
                 else
@@ -642,6 +657,10 @@ class Toml
      */
     public static function isISODate($val)
     {
+        if(!is_string($val)) {
+            return false;
+        }
+
         // Use DateTime support to check for valid dates.
         try
         {
