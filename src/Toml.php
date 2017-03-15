@@ -104,7 +104,8 @@ class Toml
                 $pointer = & $result;
 
                 $tableName = substr($line, 2, -2);
-                $aTable = explode('.', $tableName);
+                //$aTable = explode('.', $tableName);
+                $aTable = self::parseTableName($tableName);
 
                 foreach($aTable as $tableName)
                 {
@@ -149,7 +150,8 @@ class Toml
                 $tableName = substr($line, 1, -1);
                 $tableName = trim($tableName);
 
-                $aTable = explode('.', $tableName);
+                //$aTable = explode('.', $tableName);
+                $aTable = self::parseTableName($tableName);
                 $last = count($aTable) - 1;
 
                 foreach($aTable as $i => $tableName)
@@ -438,6 +440,51 @@ class Toml
         return $normalized;
     }
 
+
+    /**
+     * Parses TOML table names and returns the hierarchy array of table names.
+     *
+     * @param (string) $name
+     *
+     * @return (array) Table names
+     */
+    private static function parseTableName($name)
+    {
+        // Init buffer
+        $buffer = '';
+        $strOpen = false;
+        $names = array();
+
+        $strLen = strlen($name);
+        for($i = 0; $i < $strLen; $i++)
+        {
+            if($name[$i] == '"')
+            {
+                // Toggle strings
+                if( !$strOpen || ($strOpen && $name[$i - 1] != "\\") )
+                {
+                    $strOpen = !$strOpen;
+                }
+            }
+            elseif($name[$i] == '.' && !$strOpen)
+            {
+                // Save and cleanup buffer. Continue.
+                $names[] = $buffer;
+                $buffer = '';
+                continue;
+            }
+
+            // Store char
+            $buffer .= $name[$i];
+        }
+
+        // Save last buffer
+        if($buffer != '') {
+            $names[] = $buffer;
+        }
+
+        return $names;
+    }
 
     /**
      * Parses TOML value and returns it to be assigned on the hashed array

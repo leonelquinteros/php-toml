@@ -24,6 +24,9 @@ test_string = "You'll hate me after this - #"          # " Annoying, isn't it?
             # ] Oh yes I did
             ]
 
+[the.hard."bit#"."even.harder"]
+nothing = 'to see'
+
 # Each of the following keygroups/key value pairs should produce an error. Uncomment to them to test
 
 #[error]   if you didn't catch this, your parser is broken
