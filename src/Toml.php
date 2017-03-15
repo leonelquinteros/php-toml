@@ -57,6 +57,9 @@ class Toml
 
         $toml = file_get_contents($path);
 
+        // Remove BOM if present
+        $toml = preg_replace('/^' . pack('H*','EFBBBF') . '/', '', $toml);
+
         return self::parse($toml);
     }
 
@@ -146,17 +149,6 @@ class Toml
                 $tableName = substr($line, 1, -1);
                 $tableName = trim($tableName);
 
-                // Allow quoted table names
-                if($tableName[0] == '"' && substr($tableName,-1) == '"')
-                {
-                    $tableName = json_decode($tableName);
-                }
-                elseif(!ctype_alnum(str_replace(array('-', '_', '.'), '', $tableName))) // Check for proper keys
-                {
-                    // Invalid table name
-                    throw new Exception("Invalid table name: " . $tableName);
-                }
-
                 $aTable = explode('.', $tableName);
                 $last = count($aTable) - 1;
 
@@ -166,6 +158,17 @@ class Toml
                     {
                         // Empty table name
                         throw new Exception("Empty table keys aren't allowed on line " . $line);
+                    }
+
+                    // Allow quoted table names
+                    if(($tableName[0] == '"' && substr($tableName,-1) == '"') || ($tableName[0] == "'" && substr($tableName,-1) == "'"))
+                    {
+                        $tableName = json_decode($tableName);
+                    }
+                    elseif(!ctype_alnum(str_replace(array('-', '_', '.'), '', $tableName))) // Check for proper keys
+                    {
+                        // Invalid table name
+                        throw new Exception("Invalid table name: " . $tableName);
                     }
 
                     if( !isset($pointer[$tableName]) )
