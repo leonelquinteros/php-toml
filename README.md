@@ -1,4 +1,7 @@
+[![Packagist](https://img.shields.io/packagist/v/leonelquinteros/php-toml.svg)](https://packagist.org/packages/leonelquinteros/php-toml)
+[![Packagist](https://img.shields.io/packagist/l/leonelquinteros/php-toml.svg)](https://packagist.org/packages/leonelquinteros/php-toml)
 [![Build Status](https://travis-ci.org/leonelquinteros/php-toml.svg?branch=master)](https://travis-ci.org/leonelquinteros/php-toml)
+[![Packagist](https://img.shields.io/packagist/dt/leonelquinteros/php-toml.svg)](https://packagist.org/packages/leonelquinteros/php-toml)
 
 
 PHP TOML parser
