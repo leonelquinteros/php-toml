@@ -1,11 +1,31 @@
 {
-    "name": "leonelquinteros/php-toml",
-    "description": "PHP parser for TOML language ( https://github.com/toml-lang/toml )",
-    "require": {
-        "php": ">=5.2.0"
-    },
-    "type": "library",
-    "keywords": ["toml", "parser", "php", "library", "lib", "class", "package", "mojombo", "leonelquinteros"],
-    "homepage": "http://github.com/leonelquinteros/php-toml",
-    "license": "BSD"
+	"name" : "leonelquinteros/php-toml",
+	"description" : "PHP parser for TOML language ( https://github.com/toml-lang/toml )",
+	"require" : {
+		"php" : ">=5.2.0"
+	},
+	"type" : "library",
+	"keywords" : [
+		"toml",
+		"parser",
+		"php",
+		"library",
+		"lib",
+		"class",
+		"package",
+		"mojombo",
+		"leonelquinteros"
+	],
+	"homepage" : "http://github.com/leonelquinteros/php-toml",
+	"license" : "BSD",
+	"authors" : [{
+			"name" : "Leonel Quinteros",
+			"email" : "leonel.quinteros@gmail.com",
+			"role" : "Author"
+		}
+	],
+	"support" : {
+		"issues" : "https://github.com/leonelquinteros/php-toml/issues",
+		"source" : "https://github.com/leonelquinteros/php-toml"
+	}
 }
