@@ -245,3 +245,7 @@ color = "gray"
   [[fruit.variety]]
     name = "plantain"
     
+    
+
+[user.contributed.cases]
+slashes="SERVER\\MASTER"

@@ -368,12 +368,12 @@ class Toml
                     $openLString = !$openLString;
                 }
             }
-            elseif($toml[$i] == "\\" && !in_array($toml[$i+1], array('b', 't', 'n', 'f', 'r', 'u', 'U', '"', "\\", ' ')))
+            elseif($toml[$i] == "\\" && $toml[$i-1] != "\\" && !in_array($toml[$i+1], array('b', 't', 'n', 'f', 'r', 'u', 'U', '"', "\\", ' ')))
             {
                 // Reserved special characters inside strings should produce error
                 if($openString)
                 {
-                    throw new Exception('Reserved special characters inside strings are not allowed: ' . $toml[$i] . $toml[$i+1]);
+                	throw new Exception('Reserved special characters inside strings are not allowed: ' . $toml[$i] . $toml[$i+1]);
                 }
 
                 // Cleanup escaped new lines and whitespaces from multi-line strings
