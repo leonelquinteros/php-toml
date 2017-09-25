@@ -24,6 +24,11 @@
 			"role" : "Author"
 		}
 	],
+	"autoload": {
+		"classmap": [
+			"./src/Toml.php"
+		]
+	},
 	"support" : {
 		"issues" : "https://github.com/leonelquinteros/php-toml/issues",
 		"source" : "https://github.com/leonelquinteros/php-toml"
