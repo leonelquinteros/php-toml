@@ -557,7 +557,7 @@ class Toml
         {
             $val = str_replace('_', '', $val);
 
-            if(is_int($val))
+            if(ctype_digit($val))
             {
                 $parsedVal = (int) $val;
             }
