@@ -557,9 +557,10 @@ class Toml
         {
             $val = str_replace('_', '', $val);
 
-            if(is_int($val))
+            $intVal = filter_var($val, FILTER_VALIDATE_INT);
+            if($intVal !== false)
             {
-                $parsedVal = (int) $val;
+                $parsedVal = $intVal;
             }
             else
             {
