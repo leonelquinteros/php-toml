@@ -17,7 +17,7 @@
 		"leonelquinteros"
 	],
 	"homepage" : "http://github.com/leonelquinteros/php-toml",
-	"license" : "BSD",
+	"license" : "BSD-3-Clause-Clear",
 	"authors" : [{
 			"name" : "Leonel Quinteros",
 			"email" : "leonel.quinteros@gmail.com",
