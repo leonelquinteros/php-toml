@@ -399,7 +399,7 @@ class Toml
             }
 
             // Raw Lines
-            if(!isset($toml[$i])) {
+            if(isset($toml[$i])) {
                 $lineBuffer .= $toml[$i];
                 if($toml[$i] == "\n")
                 {
