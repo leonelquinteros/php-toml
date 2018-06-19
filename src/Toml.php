@@ -415,15 +415,17 @@ class Toml
             }
 
             // Raw Lines
-            $lineBuffer .= $toml[$i];
-            if($toml[$i] == "\n")
-            {
-                $lineBuffer = '';
-            }
+            if(isset($toml[$i])) {
+                $lineBuffer .= $toml[$i];
+                if($toml[$i] == "\n")
+                {
+                    $lineBuffer = '';
+                }
 
-            if($keep)
-            {
-                $normalized .= $toml[$i];
+                if($keep)
+                {
+                    $normalized .= $toml[$i];
+                }
             }
         }
 
