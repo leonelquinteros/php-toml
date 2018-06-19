@@ -36,7 +36,7 @@
  *
  * @author Leonel Quinteros https://github.com/leonelquinteros
  *
- * @version 0.4.1
+ * @version 1.0.0
  *
  */
 class Toml
@@ -73,17 +73,14 @@ class Toml
      */
     public static function parse($toml)
     {
-        $result = array();
+        $result = new stdClass();
         $pointer = & $result;
-        $isTableArray = false;
 
         // Pre-compile
         $toml = self::normalize($toml);
 
         // Split lines
         $aToml = explode("\n", $toml);
-
-        //foreach($aToml as $line)
         for($ln = 0; $ln < count($aToml); $ln++)
         {
             $line = trim($aToml[$ln]);
@@ -97,17 +94,14 @@ class Toml
             // Array of Tables
             if(substr($line, 0, 2) == '[[' && substr($line, -2) == ']]')
             {
-                // Mark table array
-                $isTableArray = true;
-
                 // Set pointer at top level.
                 $pointer = & $result;
 
                 $tableName = substr($line, 2, -2);
-                //$aTable = explode('.', $tableName);
                 $aTable = self::parseTableName($tableName);
 
-                foreach($aTable as $tableName)
+                $last = count($aTable) - 1;
+                foreach($aTable as $i => $tableName)
                 {
                     $tableName = trim($tableName);
 
@@ -128,22 +122,36 @@ class Toml
                         throw new Exception("Invalid table name: " . $tableName);
                     }
 
-                    if( !isset($pointer[$tableName]) )
+                    // Create array of tables and move pointer forward
+                    if( is_array($pointer) && !isset($pointer[$tableName]) )
                     {
-                        // Create array of tables
                         $pointer[$tableName] = array();
                     }
+                    elseif(is_object($pointer) && !isset( $pointer->$tableName ))
+                    {
+                        $pointer->$tableName = array();
+                    }
+                    if(is_array($pointer)) {
+                        $pointer = & $pointer[$tableName];
+                    } else {
+                        $pointer = & $pointer->$tableName;
+                    }
 
-                    // Move pointer forward
-                    $pointer = & $pointer[$tableName];
+                    // Handle array of tables
+                    if($i < $last && is_array($pointer)) {
+                        end($pointer);
+                        $pointer = & $pointer[key($pointer)];
+                    }
                 }
+
+                // Add item to array of tables
+                $pointer[] = array();
+                end($pointer);
+                $pointer =  & $pointer[key($pointer)];
             }
             // Single Tables
             elseif($line[0] == '[' && substr($line, -1) == ']')
             {
-                // Unmark table array
-                $isTableArray = false;
-
                 // Set pointer at first level.
                 $pointer = & $result;
 
@@ -173,10 +181,14 @@ class Toml
                         throw new Exception("Invalid table name: " . $tableName);
                     }
 
-                    if( !isset($pointer[$tableName]) )
+                    if( is_array($pointer) && !isset($pointer[$tableName]) )
                     {
                         // Create table
-                        $pointer[$tableName] = array();
+                        $pointer[$tableName] = new stdClass();
+                    }
+                    elseif(is_object($pointer) && !isset( $pointer->$tableName ))
+                    {
+                        $pointer->$tableName = new stdClass();
                     }
                     elseif($i == $last)
                     {
@@ -185,28 +197,27 @@ class Toml
                     }
 
                     // Move pointer forward
-                    $pointer = & $pointer[$tableName];
+                    if( is_array($pointer) ) {
+                        $pointer = & $pointer[$tableName];
+                    } else {
+                        $pointer = & $pointer->$tableName;
+                    }
+
+                    // Handle array of tables
+                    if(is_array($pointer)) {
+                        end($pointer);
+                        $pointer = & $pointer[key($pointer)];
+                    }
                 }
             }
             // Key = Values
             elseif(strpos($line, '='))
             {
-                // Handle table array
-                if($isTableArray)
-                {
-                    // Create new item and point it
-                    $pointer[] = array();
-                    end($pointer);
-                    $pointer =  & $pointer[key($pointer)];
-
-                    // Unmark table array
-                    $isTableArray = false;
-                }
-
                 $kv = explode('=', $line, 2);
 
-                if(!isset($pointer[ trim($kv[0]) ]))
-                {
+                if(is_object($pointer) && !isset( $pointer->{trim($kv[0])} )
+                    || is_array($pointer) && !isset( $pointer[trim($kv[0])] )
+                ) {
                     // Multi-line strings
                     if(substr(trim($kv[1]), 0, 3) == '"""')
                     {
@@ -236,7 +247,12 @@ class Toml
                     }
 
                     // Set key=value
-                    $pointer[ trim($kv[0]) ] = self::parseValue( trim($kv[1]) );
+                    if(is_array($pointer)) {
+                        $pointer[ trim($kv[0]) ] = self::parseValue( trim($kv[1]) );
+                    } else {
+                        $pointer->{trim($kv[0])} = self::parseValue( trim($kv[1]) );
+                    }
+                    
                 }
                 else
                 {
@@ -682,7 +698,7 @@ class Toml
             throw new Exception('Invalid inline table definition: ' . $val);
         }
 
-        $result = array();
+        $result = new stdClass();
         $openString = false;
         $openLString = false;
         $buffer = '';
@@ -703,7 +719,7 @@ class Toml
             {
                 // Parse buffer
                 $kv = explode('=', $buffer, 2);
-                $result[trim($kv[0])] = self::parseValue( trim($kv[1]) );
+                $result->{trim($kv[0])} = self::parseValue( trim($kv[1]) );
 
                 // Clear buffer
                 $buffer = '';
@@ -716,7 +732,7 @@ class Toml
 
         // Parse last buffer
         $kv = explode('=', $buffer, 2);
-        $result[trim($kv[0])] = self::parseValue( trim($kv[1]) );
+        $result->{trim($kv[0])} = self::parseValue( trim($kv[1]) );
 
         return $result;
     }
