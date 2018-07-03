@@ -6,6 +6,26 @@
 
 
 ################################################################################
+## Keys
+
+# Quoted keys follow the exact same rules as either basic strings or literal strings and allow you to use a much broader set of key names. 
+# Best practice is to use bare keys except when absolutely necessary.
+
+key = "value"
+bare_key = "value"
+bare-key = "value"
+1234 = "value"
+
+# Dotted keys are a sequence of bare or quoted keys joined with a dot. 
+# This allows for grouping similar properties together:
+
+name = "Orange"
+physical.color = "orange"
+physical.shape = "round"
+site."google.com" = true
+
+
+################################################################################
 ## Table
 
 # Tables (also known as hash tables or dictionaries) are collections of

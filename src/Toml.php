@@ -247,12 +247,7 @@ class Toml
                     }
 
                     // Set key=value
-                    if(is_array($pointer)) {
-                        $pointer[ trim($kv[0]) ] = self::parseValue( trim($kv[1]) );
-                    } else {
-                        $pointer->{trim($kv[0])} = self::parseValue( trim($kv[1]) );
-                    }
-                    
+                    $key = self::parseKeyValue(trim($kv[0]), trim($kv[1]), $pointer);
                 }
                 else
                 {
@@ -737,6 +732,77 @@ class Toml
         $result->{trim($kv[0])} = self::parseValue( trim($kv[1]) );
 
         return $result;
+    }
+
+    /**
+     * Function that takes a key expression and the current pointer to position in the right hierarchy.
+     * Then it sets the corresponding value on that position.
+     *
+     * @param  (string) $key
+     * @param  (&) $pointer
+     */
+    private static function parseKeyValue($key, $val, & $pointer) 
+    {
+        // Flags
+        $openQuote = false;
+        $openDoubleQuote = false;
+
+        // Buffer
+        $buff = '';
+
+        // Parse
+        for($i = 0; $i < strlen($key); $i++) {
+            // Handle quoting
+            if($key[$i] == '"') {
+                if(!$openQuote) {
+                    if($openDoubleQuote) {
+                        $openDoubleQuote = false;
+                    } else {
+                        $openDoubleQuote = true;
+                    }
+                    continue;
+                }
+            }
+            if($key[$i] == "'") {
+                if(!$openDoubleQuote) {
+                    if($openQuote) {
+                        $openQuote = false;
+                    } else {
+                        $openQuote = true;
+                    }
+                    continue;
+                }
+            }
+
+            // Handle dotted keys
+            if($key[$i] == "." && !$openQuote && !$openDoubleQuote) {
+                if(is_array($pointer)) {
+                    if(!isset($pointer[$buff])) {
+                        $pointer[$buff] = new stdClass();
+                    }
+                    $pointer = & $pointer[$buff];
+                } else {
+                    if(!isset($pointer->{$buff})) {
+                        $pointer->{$buff} = new stdClass();
+                    }
+                    $pointer = & $pointer->{$buff};
+                }
+
+                // Cleanup buffer
+                $buff = '';
+                continue;
+            }
+
+            $buff .= $key[$i];
+        }
+
+        if(is_array($pointer)) {
+            $pointer[$buff] = self::parseValue( $val );
+        } else {
+            $pointer->{$buff} = self::parseValue( $val );
+        }
+
+        return $buff;
     }
 
     /**
