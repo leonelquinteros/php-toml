@@ -616,6 +616,7 @@ class Toml
         $result = array();
         $openBrackets = 0;
         $openString = false;
+        $openCurlyBraces = 0;
         $openLString = false;
         $buffer = '';
 
@@ -659,14 +660,26 @@ class Toml
             elseif($val[$i] == "'"  && !$openString) {
                 $openLString = !$openLString;
             }
-
-            if( $val[$i] == ',' && !$openString && !$openLString && $openBrackets == 1)
+            elseif($val[$i] == "{" && !$openString && !$openLString) {
+                $openCurlyBraces++;
+            }
+            elseif($val[$i] == "}" && !$openString && !$openLString) {
+                $openCurlyBraces--;
+            }
+            
+            if( ($val[$i] == ',' || $val[$i] == '}') && !$openString && !$openLString && $openBrackets == 1 && $openCurlyBraces == 0)
             {
-                $result[] = self::parseValue( trim($buffer) );
+                if ($val[$i] == '}') {
+                    $buffer .= $val[$i];
+                }
 
-                if (!self::checkDataType($result))
-                {
-                    throw new Exception('Data types cannot be mixed in an array: ' . $buffer);
+                if (!empty(trim($buffer))) {
+                    $result[] = self::parseValue( trim($buffer) );
+
+                    if (!self::checkDataType($result))
+                    {
+                        throw new Exception('Data types cannot be mixed in an array: ' . $buffer);
+                    }
                 }
                 $buffer = '';
             }
@@ -698,6 +711,7 @@ class Toml
         $result = new stdClass();
         $openString = false;
         $openLString = false;
+        $openBrackets = 0;
         $buffer = '';
 
         $strLen = strlen($val);
@@ -711,8 +725,14 @@ class Toml
             elseif($val[$i] == "'") {
                 $openLString = !$openLString;
             }
+            elseif($val[$i] == "[" && !$openString && !$openLString) {
+                $openBrackets++;
+            }
+            elseif($val[$i] == "]" && !$openString && !$openLString) {
+                $openBrackets--;
+            }
 
-            if( $val[$i] == ',' && !$openString && !$openLString )
+            if( $val[$i] == ',' && !$openString && !$openLString && $openBrackets == 0)
             {
                 // Parse buffer
                 $kv = explode('=', $buffer, 2);
