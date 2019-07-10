@@ -271,3 +271,13 @@ color = "gray"
 slashes="SERVER\\MASTER"
 
 foo = [1,2,3.1, +1, -1, -2.5]
+
+
+
+# Additions from Github issues
+
+PR17 = [
+  {title = "Home", url = "/", childs = []},
+  {title = "Games", url = "/games", childs = [{title = "Game A", url = "/games/game-a", childs = []}, {title = "Game B", url = "/games/game-b", childs = []}]},
+  {title = "About us", url = "/about", childs = []}
+]

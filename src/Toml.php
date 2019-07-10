@@ -673,8 +673,9 @@ class Toml
                     $buffer .= $val[$i];
                 }
 
-                if (!empty(trim($buffer))) {
-                    $result[] = self::parseValue( trim($buffer) );
+                $buffer = trim($buffer);
+                if (!empty($buffer)) {
+                    $result[] = self::parseValue($buffer);
 
                     if (!self::checkDataType($result))
                     {
